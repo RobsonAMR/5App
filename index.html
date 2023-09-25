@@ -14,38 +14,32 @@
   </style>
 </head>
 <body>
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>
-        <h1>Lista de Compras</h1>
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <h3><ion-button expand="full" onclick="adicionarItem()">Adicionar Item</ion-button></h3>
+  <header>
+    <h1>Lista de Compras</h1>
+  </header>
+  <section>
+    <h3><button onclick="adicionarItem()">Adicionar Item</button></h3>
 
-    <ion-list>
-      <ion-item *ngFor="let item of listaCompras; let i = index">
-        <h5>{{ item.nome }} - {{ item.quantidade }} x {{ item.preco }}</h5>
-        <ion-button onclick="removerItem(i)" slot="end" fill="clear">Remover</ion-button>
-        <ion-button onclick="removerUnidade(i)" slot="end" fill="clear">-</ion-button>
-        <ion-button onclick="adicionarUnidade(i)" slot="end" fill="clear">+</ion-button>
-      </ion-item>
-    </ion-list>
+    <ul>
+      <!-- Lista de itens -->
+    </ul>
 
-    <h3><ion-button expand="full" onclick="calcularTotal()">Calcular Total</ion-button></h3>
-    <h2><ion-label>Total: {{ total }}</ion-label></h2>
+    <h3><button onclick="calcularTotal()">Calcular Total</button></h3>
+    <h2>Total: <span id="total">0.00</span></h2>
 
     <div class="image-container">
       <img src="assets/icon/306926.png" width="700px" />
     </div>
-  </ion-content>
+  </section>
 
   <footer>
     <h3>Robson Almeida Lista de Compras 2023&copy;</h3>
   </footer>
 
   <script>
+    const listaCompras = [];
+    let total = 0;
+
     function adicionarItem() {
       const nome = prompt('Nome do item:');
       if (!nome) {
@@ -72,12 +66,12 @@
 
       const totalItem = quantidade * precoUnitario;
 
-      const index = this.listaCompras.findIndex((item) => item.nome === nome);
+      const index = listaCompras.findIndex((item) => item.nome === nome);
       if (index !== -1) {
-        this.listaCompras[index].quantidade += quantidade;
-        this.listaCompras[index].total += totalItem;
+        listaCompras[index].quantidade += quantidade;
+        listaCompras[index].total += totalItem;
       } else {
-        this.listaCompras.push({
+        listaCompras.push({
           nome,
           quantidade,
           preco: precoUnitario.toFixed(2),
@@ -85,38 +79,41 @@
         });
       }
 
-      calcularTotal();
+      exibirLista();
     }
 
     function calcularTotal() {
       let totalCalculado = 0;
 
-      for (const item of this.listaCompras) {
+      for (const item of listaCompras) {
         totalCalculado += parseFloat(item.total);
       }
 
-      this.total = parseFloat(totalCalculado.toFixed(2));
+      total = parseFloat(totalCalculado.toFixed(2));
+      document.getElementById('total').textContent = total.toFixed(2);
+    }
+
+    function exibirLista() {
+      const lista = document.querySelector('ul');
+      lista.innerHTML = '';
+
+      for (let i = 0; i < listaCompras.length; i++) {
+        const item = listaCompras[i];
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+          ${item.nome} - ${item.quantidade} x ${item.preco}
+          <button onclick="removerItem(${i})">Remover</button>
+        `;
+        lista.appendChild(listItem);
+      }
     }
 
     function removerItem(index) {
       if (confirm('Tem certeza de que deseja remover este item?')) {
-        this.listaCompras.splice(index, 1);
+        listaCompras.splice(index, 1);
+        exibirLista();
         calcularTotal();
       }
-    }
-
-    function removerUnidade(index) {
-      if (this.listaCompras[index].quantidade > 1) {
-        this.listaCompras[index].quantidade--;
-        this.listaCompras[index].total -= parseFloat(this.listaCompras[index].preco);
-        calcularTotal();
-      }
-    }
-
-    function adicionarUnidade(index) {
-      this.listaCompras[index].quantidade++;
-      this.listaCompras[index].total += parseFloat(this.listaCompras[index].preco);
-      calcularTotal();
     }
   </script>
 </body>
